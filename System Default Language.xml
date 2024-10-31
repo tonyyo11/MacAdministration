@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><extensionAttribute>
+<displayName>System Default Language</displayName>
+<description>Reports the default Apple Language on an end-user system</description>
+<dataType>string</dataType>
+<scriptContentsMac>#!/bin/sh&#13;
+&#13;
+PRIMLOCALE=$( defaults read /Library/Preferences/.GlobalPreferences AppleLanguages | tr -d [:space:] | cut -c3-7 )&#13;
+echo "&lt;result&gt;$PRIMLOCALE&lt;/result&gt;"&#13;
+&#13;
+exit 0</scriptContentsMac>
+</extensionAttribute>

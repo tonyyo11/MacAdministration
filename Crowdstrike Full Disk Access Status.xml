@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?><extensionAttribute>
+<displayName>Crowdstrike Full Disk Access Status</displayName>
+<description/>
+<dataType>string</dataType>
+<scriptContentsMac>#!/bin/bash&#13;
+# CrowdStrike FDA EA.sh&#13;
+# This will check if CrowdStrike has Full Disk Access to the host&#13;
+# If the result of auth, exec or notify is not 0, FDA is not functioning properly&#13;
+&#13;
+&#13;
+auth=$(/Applications/Falcon.app/Contents/Resources/falconctl stats EndpointSecurity  | grep auth: | awk '{print $2}' )&#13;
+exec=$(/Applications/Falcon.app/Contents/Resources/falconctl stats EndpointSecurity  | grep exec: | awk '{print $2}' )&#13;
+notify=$(/Applications/Falcon.app/Contents/Resources/falconctl stats EndpointSecurity  | grep notify: | awk '{print $2}' )&#13;
+&#13;
+&#13;
+echo "&lt;result&gt;auth:$auth exec:$exec notify:$notify&lt;/result&gt;"</scriptContentsMac>
+</extensionAttribute>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><extensionAttribute>
+<displayName>Outlook Addins List</displayName>
+<description>Extension Attribute to report the list of modern web-based add-ins that Outlook has loaded</description>
+<dataType>string</dataType>
+<scriptContentsMac>#!/bin/zsh&#13;
+# set -x&#13;
+&#13;
+## Extension Attribute to report the list of modern web-based add-ins that Outlook has loaded&#13;
+&#13;
+GetLoggedInUser() {&#13;
+	LOGGEDIN=$(/bin/echo "show State:/Users/ConsoleUser" | /usr/sbin/scutil | /usr/bin/awk '/Name :/&amp;&amp;!/loginwindow/{print $3}')&#13;
+	if [ "$LOGGEDIN" = "" ]; then&#13;
+		echo "$USER"&#13;
+	else&#13;
+		echo "$LOGGEDIN"&#13;
+	fi&#13;
+}&#13;
+&#13;
+GetHomeFolder() {&#13;
+	HOME=$(dscl . read /Users/"$1" NFSHomeDirectory | cut -d ':' -f2 | cut -d ' ' -f2)&#13;
+	if [ "$HOME" = "" ]; then&#13;
+		if [ -d "/Users/$1" ]; then&#13;
+			HOME="/Users/$1"&#13;
+		else&#13;
+			HOME=$(eval echo "~$1")&#13;
+		fi&#13;
+	fi&#13;
+}&#13;
+&#13;
+GetManifestsFolder() {&#13;
+	# Outlook can create multiple Manifests folders, so get the most recent&#13;
+	MANIFESTPATH=$(print -lr -- $HOME/Library/Containers/com.microsoft.Outlook/Data/Library/Application\ Support/Microsoft/Office/16.0/Wef/**/Manifests(om[1,1]))&#13;
+	echo "$MANIFESTPATH"&#13;
+}&#13;
+&#13;
+## Main&#13;
+LoggedInUser=$(GetLoggedInUser)&#13;
+GetHomeFolder "$LoggedInUser"&#13;
+ManifestsFolder=$(GetManifestsFolder)&#13;
+&#13;
+# Enumerate files in the Manifests folder&#13;
+if [ -d "$ManifestsFolder" ]; then&#13;
+	for manifest in $ManifestsFolder/**; do&#13;
+		# New Outlook uses binary-based manifests, so we need to remove non-text characters as part of the grep&#13;
+		ADDIN=$(cat "$manifest" | LC_ALL=C tr -d '[\000-\011\013-\037\177-\377]' | grep '&lt;DisplayName' | cut -d '"' -f2 | sed -e 's/^[[:space:]]*//')&#13;
+		if [ "$ADDIN" != "" ]; then&#13;
+			AddInList+="$ADDIN;"&#13;
+		fi&#13;
+	done&#13;
+	echo "&lt;result&gt;$AddInList&lt;/result&gt;"&#13;
+&#13;
+else&#13;
+	echo "&lt;result&gt;None&lt;/result&gt;"&#13;
+fi&#13;
+&#13;
+exit 0</scriptContentsMac>
+</extensionAttribute>

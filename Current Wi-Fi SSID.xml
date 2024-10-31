@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><extensionAttribute>
+<displayName>Current Wi-Fi SSID</displayName>
+<description/>
+<dataType>string</dataType>
+<scriptContentsMac>#!/bin/sh&#13;
+&#13;
+result=`/usr/sbin/networksetup -getairportnetwork en0 | awk '{ print $4 }'`&#13;
+&#13;
+echo "&lt;result&gt;$result&lt;/result&gt;"</scriptContentsMac>
+</extensionAttribute>

@@ -1,0 +1,69 @@
+{
+  "title": "Restrictions (macOS) (com.apple.applicationaccess)",
+  "description": "macOS Restrictions preferences",
+  "properties": {
+    "allowiPhoneMirroring": {
+      "type": "boolean",
+      "title": "Allow iPhone Mirroring ",
+      "default": true,
+      "description": "If 'true', allows iPhone Mirroring. Available in macOS 15.0 and later.",
+      "property_order": 5
+    },
+    "allowGenmoji": {
+      "type": "boolean",
+      "title": "Allow Genmoji",
+      "default": true,
+      "description": "If 'true', allows Genmoji creation. Available in macOS 15.0 and later.",
+      "property_order": 10
+    },
+    "allowPersonalizedHandwritingResults": {
+      "type": "boolean",
+      "title": "Allow Personalized Handwriting Results",
+      "default": true,
+      "description": "If 'true', allows Personalized Handwriting Results. Available in macOS 15.0 and later.",
+      "property_order": 15
+    },
+    "allowVideoConferencingRemoteControl": {
+      "type": "boolean",
+      "title": "Allow Remote Control via Facetime Calls",
+      "default": true,
+      "description": "If 'true', allows Video Conferencing Remote Control via Facetime Calls. Available in macOS 15.0 and later.",
+      "property_order": 20
+    },
+    "allowWritingTools": {
+      "type": "boolean",
+      "title": "Allow Apple Intelligence Writing Tools",
+      "default": true,
+      "description": "If 'true', allows Apple Intelligence Writing Tools. Available in macOS 15.0 and later.",
+      "property_order": 25
+    },
+    "allowMailSummary": {
+      "type": "boolean",
+      "title": "Allow Apple Intelligence Mail Summary",
+      "default": true,
+      "description": "If 'true', allows Apple Intelligence Writing Tools. Available in macOS 15.1 and later.",
+      "property_order": 30
+    },
+    "forceBypassScreenCaptureAlert": {
+      "type": "boolean",
+      "title": "Bypass Screen Capture Alert",
+      "default": true,
+      "description": "If 'true', Bypass Screen Capture Alert. Available in macOS 15.1 and later.",
+      "property_order": 35
+    },
+    "allowExternalIntelligenceIntegrations": {
+      "type": "boolean",
+      "title": "Allow External Intelligence Integration",
+      "default": true,
+      "description": "If 'true', Allows External ChatGPT integration with Apple Intelligence. Available in macOS 15.2 and later.",
+      "property_order": 40
+    },
+    "allowExternalIntelligenceIntegrationsSignIn": {
+      "type": "boolean",
+      "title": "Allow External Intelligence Integration Sign-In",
+      "default": true,
+      "description": "If 'true', Allows External ChatGPT integration Sign-ins with Apple Intelligence. Available in macOS 15.2 and later.",
+      "property_order": 45
+    }
+  }
+}

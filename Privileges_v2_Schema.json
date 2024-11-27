@@ -1,0 +1,224 @@
+{
+  "description": "Comprehensive schema for Privileges configuration.",
+  "title": "Privileges Configuration (corp.sap.privileges)",
+  "type": "object",
+  "properties": {
+    "ExpirationInterval": {
+      "description": "Set a fixed time interval after which administrator privileges expire and revert to standard user rights. A value of 0 disables the timeout.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "integer",
+          "default": 15
+        }
+      ]
+    },
+    "ExpirationIntervalMax": {
+      "description": "Set a maximum time interval for a user to request administrative privileges. Allows users to choose any timeout value up to the specified one.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "integer",
+          "default": 20
+        }
+      ]
+    },
+    "EnforcePrivileges": {
+      "description": "Enforce specific privileges. Values can be 'admin', 'user', or 'none'. Enforces privileges immediately and restricts further changes.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "string",
+          "enum": [
+            "admin",
+            "user",
+            "none"
+          ],
+          "default": "admin"
+        }
+      ]
+    },
+    "LimitToGroup": {
+      "description": "Restrict use of the application to a specified group or list of groups. Specify as a string or array of strings.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "string",
+          "default": "group_name_goes_here"
+        }
+      ]
+    },
+    "LimitToUser": {
+      "description": "Restrict use of the application to a specified user or list of users. Variables such as $USERNAME can be used if supported by the management system.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "string",
+          "default": "username_goes_here"
+        }
+      ]
+    },
+    "ReasonRequired": {
+      "description": "Specifies whether users must provide a reason for requesting administrator privileges. When true, privileges cannot be changed from the Privileges Dock tile menu.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "boolean",
+          "default": true
+        }
+      ]
+    },
+    "ReasonMinLength": {
+      "description": "If 'ReasonRequired' is true, specifies the minimum number of characters for the reason. Defaults to 10.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "integer",
+          "default": 20
+        }
+      ]
+    },
+    "ReasonMaxLength": {
+      "description": "If 'ReasonRequired' is true, specifies the maximum number of characters for the reason. Defaults to 250.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "integer",
+          "default": 50
+        }
+      ]
+    },
+    "ReasonPresetList": {
+      "description": "If 'ReasonRequired' is true, allows pre-defining a list of possible reasons for becoming an admin. This creates an additional pop-up menu in the dialog box (only for the GUI version of Privileges).",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "default": {
+                "description": "A predefined reason option.",
+                "type": "string",
+                "examples": [
+                  "Just for fun",
+                  "For installing software",
+                  "Don't know"
+                ]
+              }
+            },
+            "required": [
+              "default"
+            ]
+          }
+        }
+      ]
+    },
+    "RemoteLogging": {
+      "description": "Configuration for logging server settings.",
+      "type": "object",
+      "properties": {
+        "ServerType": {
+          "description": "The type of logging server. Supported values are 'syslog' and 'webhook'.",
+          "type": "string",
+          "enum": [
+            "syslog",
+            "webhook"
+          ],
+          "default": "syslog"
+        },
+        "ServerAddress": {
+          "description": "The address of the logging server.",
+          "type": "string",
+          "default": "ip_address_or_host_name_goes_here"
+        },
+        "SyslogOptions": {
+          "description": "Syslog-specific options.",
+          "type": "object",
+          "properties": {
+            "ServerPort": {
+              "type": "integer",
+              "default": 514
+            },
+            "LogFacility": {
+              "type": "integer",
+              "default": 4
+            },
+            "LogSeverity": {
+              "type": "integer",
+              "default": 6
+            },
+            "MaximumMessageSize": {
+              "type": "integer",
+              "default": 480
+            }
+          }
+        }
+      }
+    },
+    "RequireAuthentication": {
+      "description": "Specifies whether authentication is required to obtain administrator privileges. When true, users are prompted for their account password or Touch ID if available.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "boolean",
+          "default": true
+        }
+      ]
+    },
+    "AllowCLIBiometricAuthentication": {
+      "description": "Specifies whether biometric authentication is allowed in the Privileges CLI to obtain administrator privileges.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "boolean",
+          "default": true
+        }
+      ]
+    }
+  }
+}

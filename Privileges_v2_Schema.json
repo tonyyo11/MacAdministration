@@ -51,7 +51,7 @@
       ]
     },
     "HideSettingsButton": {
-      "description": "If set to true, the "Settings" button is no longer displayed in the app.",
+      "description": "If set to true, the Settings button is no longer displayed in the app.",
       "anyOf": [
         {
           "title": "Not Configured",
@@ -65,7 +65,7 @@
       ]
     },
     "HideSettingsFromDockMenu": {
-      "description": "If set to true, the "Settings" menu item is no longer displayed in the Dock tile's menu.",
+      "description": "If set to true, the Settings menu item is no longer displayed in the Dock tile's menu.",
       "anyOf": [
         {
           "title": "Not Configured",

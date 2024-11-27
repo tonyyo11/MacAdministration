@@ -50,6 +50,34 @@
         }
       ]
     },
+    "HideSettingsButton": {
+      "description": "If set to true, the "Settings" button is no longer displayed in the app.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "boolean",
+          "default": true
+        }
+      ]
+    },
+    "HideSettingsFromDockMenu": {
+      "description": "If set to true, the "Settings" menu item is no longer displayed in the Dock tile's menu.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "boolean",
+          "default": true
+        }
+      ]
+    },
     "LimitToGroup": {
       "description": "Restrict use of the application to a specified group or list of groups. Specify as a string or array of strings.",
       "anyOf": [
@@ -194,6 +222,34 @@
     },
     "RequireAuthentication": {
       "description": "Specifies whether authentication is required to obtain administrator privileges. When true, users are prompted for their account password or Touch ID if available.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "boolean",
+          "default": true
+        }
+      ]
+    },
+    "RevokePrivilegesAtLogin": {
+      "description": "If set to true, the user's administrator privileges are revoked at login.",
+      "anyOf": [
+        {
+          "title": "Not Configured",
+          "type": "null"
+        },
+        {
+          "title": "Configured",
+          "type": "boolean",
+          "default": true
+        }
+      ]
+    },
+    "HideOtherWindows": {
+      "description": "By default, Privileges hides open windows to show the desktop and ensure that only the Privileges window is visible on the screen. Set HideOtherWindows to false to disable this function.",
       "anyOf": [
         {
           "title": "Not Configured",

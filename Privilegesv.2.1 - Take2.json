@@ -297,18 +297,18 @@
             "name": {
               "description": "An string to pass custom data to the webhook. If your MDM supports variables, you may pass $COMPUTERNAME",
               "type": "string",
-              "default": $COMPUTERNAME
+              "default": "$COMPUTERNAME"
             },
             "serial": {
               "description": "An string to pass custom data to the webhook. If your MDM supports variables, you may pass $COMPUTERNAME",
               "type": "string",
-              "default": $SERIALNUMBER
+              "default": "$SERIALNUMBER"
             },
             "jamfid": {
               "description": "An string to pass custom data to the webhook. If your MDM supports variables, you may pass $COMPUTERNAME",
               "type": "string",
-              "default": $JSSID
-            },
+              "default": "$JSSID"
+            }
           }
         },
         "SyslogOptions": {

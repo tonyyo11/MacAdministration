@@ -286,15 +286,29 @@
           "default": "syslog"
         },
         "ServerAddress": {
-          "description": "The address of the logging server.",
+          "description": "The address of the logging server. The server address can be an IP Address or host name if a syslog server is configured. For Webhooks, please provide an http/https URL",
           "type": "string",
           "default": "ip_address_or_host_name_goes_here"
         },
         "WebhookCustomData": {
-          "description": "Custom data to pass to the webhook, added to the webhook's JSON as custom_data.",
+          "description": "You may use this dictionary to pass custom data like machine name, serial number, Jamf Pro ID, etc. to the webhook. This data is added to the webhook's json as 'custom_data'.",
           "type": "object",
-          "additionalProperties": {
-            "type": "string"
+          "properties": {
+            "name": {
+              "description": "An string to pass custom data to the webhook. If your MDM supports variables, you may pass $COMPUTERNAME",
+              "type": "string",
+              "default": $COMPUTERNAME
+            },
+            "serial": {
+              "description": "An string to pass custom data to the webhook. If your MDM supports variables, you may pass $COMPUTERNAME",
+              "type": "string",
+              "default": $SERIALNUMBER
+            },
+            "jamfid": {
+              "description": "An string to pass custom data to the webhook. If your MDM supports variables, you may pass $COMPUTERNAME",
+              "type": "string",
+              "default": $JSSID
+            },
           }
         },
         "SyslogOptions": {
@@ -302,22 +316,27 @@
           "type": "object",
           "properties": {
             "ServerPort": {
+              "description": "An integer specifying the port of the logging server. If not specefied, the port defaults to 514 or to 6514 if TLS is enabled.",
               "type": "integer",
               "default": 514
             },
             "UseTLS": {
+              "description": "If set to true, TLS is enabled for the connection. Please make sure your clients have a certificate installed that mattches Apple's documentation. Please see https://support.apple.com/en-us/103769 for further information.",
               "type": "boolean",
               "default": false
             },
             "LogFacility": {
+              "description": "An integer specifying the syslog facility. If not specified, facility defaults to 4 (security). Please see https://tools.ietf.org/html/rfc5424#section-6.2.1 for further information.",
               "type": "integer",
               "default": 4
             },
             "LogSeverity": {
+              "description": "An integer specifying the syslog facility. If not specified, facility defaults to 6 (informational). Please see https://tools.ietf.org/html/rfc5424#section-6.2.1 for further information.",
               "type": "integer",
               "default": 6
             },
             "MaximumMessageSize": {
+              "description": "An integer specifying the maximum size of the syslog message (header + event message). If not specified, the vaule defaults to 480 which is the minimum maximum message size a syslog server must support. If the syslog message is larger than the specified maximum, the message will be truncated at the end. Please see https://tools.ietf.org/html/rfc5424#section-6.2.1 for further information.",
               "type": "integer",
               "default": 480
             }

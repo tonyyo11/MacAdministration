@@ -73,6 +73,7 @@
               "default": {
                   "type": "string"
               }
+        	}
           },
       "title": "Allow External Intelligence Workspace IDs",
       "default": true,
@@ -84,7 +85,7 @@
       "title": "Allow Apple Intelligence Notes Transcription Summary",
       "default": true,
       "description": "If 'true', allows Apple Intelligence Notes Transcription Summary. Available in macOS 15.3 and later.",
-      "property_order": 30
-    },
+      "property_order": 55
+    }
   }
 }

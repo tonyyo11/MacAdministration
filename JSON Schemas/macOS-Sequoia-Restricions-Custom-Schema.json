@@ -48,7 +48,7 @@
       "type": "boolean",
       "title": "Bypass Screen Capture Alert",
       "default": true,
-      "description": "If 'true', Bypass Screen Capture Alert. Available in macOS 15.1 and later.",
+      "description": "If 'true', Bypass Screen Capture Alert. Available in macOS 15.1 and later. (Please notes this key does not function properly within this current JSON)",
       "property_order": 35
     },
     "allowExternalIntelligenceIntegrations": {
@@ -64,6 +64,27 @@
       "default": true,
       "description": "If 'true', Allows External ChatGPT integration Sign-ins with Apple Intelligence. Available in macOS 15.2 and later.",
       "property_order": 45
-    }
+    },
+    "allowExternalIntelligenceWorkspaceIDs": {
+      "type": "array",
+      "items":{
+          "type": "object",
+          "properties": {
+              "default": {
+                  "type": "string"
+              }
+          },
+      "title": "Allow External Intelligence Workspace IDs",
+      "default": true,
+      "description": "If 'true', MDM can require sign in for request to external intelligence integrations like ChatGPT.. Available in macOS 15.3 and later.",
+      "property_order": 50
+    },
+    "allowNotesTranscriptionSummary": {
+      "type": "boolean",
+      "title": "Allow Apple Intelligence Notes Transcription Summary",
+      "default": true,
+      "description": "If 'true', allows Apple Intelligence Notes Transcription Summary. Available in macOS 15.3 and later.",
+      "property_order": 30
+    },
   }
 }

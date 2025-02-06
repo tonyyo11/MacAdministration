@@ -401,7 +401,7 @@
       ]
     },
     "EnableSmartCardSupport": {
-      "description": "Specifies whether smartcard/PIV authentication are required to obtain administrator privileges. (Available in Privileges 2.2)",
+      "description": "Specifies whether to enable smart card support for authentication. Since the modern Local Authentication framework does not yet support smart cards/PIV tokens, enabling this option will cause the application to fall back to the older Authorization Services. (Must also set RequireAuthentication. Available in Privileges 2.2)",
       "anyOf": [
         {
           "title": "Not Configured",

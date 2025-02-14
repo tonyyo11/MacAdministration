@@ -187,3 +187,12 @@ When working with Jamf Pro's Restrictions payload, organizations should avoid th
   - Always stage changes in test environment
   - Maintain backup of working profiles
   - Document all changes in change management system
+ 
+## Resources
+
+Jamf Learning Hub | [Deploying Custom Configuration Profiles Using Jamf Pro](https://learn.jamf.com/en-US/bundle/technical-articles/page/Deploying_Custom_Configuration_Profiles_Using_Jamf_Pro.html)
+iMazing | [Create or edit Configuration Profiles for iOS, macOS, tvOS, or watchOS](https://imazing.com/guides/how-to-create-or-edit-apple-configuration-profiles)
+Mod Titan | [Quick look: using Application & Custom Settings to restrict 2024 fall release features with Jamf Pro](https://www.modtitan.com/2024/09/quick-look-using-application-custom.html)
+Jamf Nation Community Feature Request: 
+- [Modernise the 'Restrictions' payload with 'include/exclude' toggle](https://ideas.jamf.com/ideas/JN-I-27743)
+- [Auto re-evaluation and/or redeployment of Configuration Profiles after macOS Updates/Upgrades for newly introduced preference keys](https://ideas.jamf.com/ideas/JPRO-I-796)

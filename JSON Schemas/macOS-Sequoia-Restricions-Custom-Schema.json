@@ -107,6 +107,13 @@
       "default": true,
       "description": "If 'true', allows Apple Intelligence Safari Summary. Available in macOS 15.4 and later.",
       "property_order": 70
+    },
+    "allowNotesTranscription": {
+      "type": "boolean",
+      "title": "Allow Notes Transcription",
+      "default": true,
+      "description": "If 'true', allows Notes Transcriptions. This key is not Apple Intelligence related. Available in macOS 15.4 and later.",
+      "property_order": 75
     }
   }
 }

@@ -86,6 +86,27 @@
       "default": true,
       "description": "If 'true', allows Apple Intelligence Notes Transcription Summary. Available in macOS 15.3 and later.",
       "property_order": 55
+    },
+    "allowAppleIntelligenceReport": {
+      "type": "boolean",
+      "title": "Allow Apple Intelligence Report",
+      "default": true,
+      "description": "If 'true', allows Apple Intelligence Reports. Available in macOS 15.4 and later.",
+      "property_order": 60
+    },
+    "allowMailSmartReplies": {
+      "type": "boolean",
+      "title": "Allow Apple Mail Smart Replies",
+      "default": true,
+      "description": "If 'true', allows Apple Intelligence Mail Smart Replies. Available in macOS 15.4 and later.",
+      "property_order": 65
+    },
+    "allowSafariSummary": {
+      "type": "boolean",
+      "title": "Allow Apple Intelligence Safari Summary",
+      "default": true,
+      "description": "If 'true', allows Apple Intelligence Safari Summary. Available in macOS 15.4 and later.",
+      "property_order": 70
     }
   }
 }

@@ -2,12 +2,11 @@
 
 ###################################################################################################
 # Script Name:    [installedVSCodeExtensions.sh]
-# By:            Tony Young
-# Organization:   Cloud Lake Technology, an Akima company
-# Date:          February 26, 2025
+# By:             Fraser Hess
+# Organization:   Pinnacol Assurance
+# Date:           February 26, 2025
 # 
-# Purpose:       Retrieve installed extensions within the Visual Studio Code application for macOS
-# Disclaimers:   Code originally written by @Fraser via the Mac Admins Slack Community - https://www.macadmins.org edited by Tony Young
+# Purpose:        Retrieve installed extensions within the Visual Studio Code application for macOS
 ###################################################################################################
 # Set Initial Result
 result="Not installed"

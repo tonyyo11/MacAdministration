@@ -1,5 +1,4 @@
 #!/bin/zsh
-#!/bin/bash
 
 ###################################################################################################
 # Script Name:    PrivilegesOnActionAlerting-MicrosoftTeamsWorkflows.zsh
@@ -14,7 +13,7 @@
 # DESCRIPTION
 #
 #   This script has been source from Andrew Doering --- https://andrewdoering.org/blog/2025/macos-privileges/
-#   Additional inspiration has been taken from Dan Snelson's Setup Your Mac v.1.16 --- https://github.com/setup-your-mac/Setup-Your-Mac/tree/1.16.0
+#   Additional inspiration has been taken from Dan Snelson's Setup Your Mac v.1.16 for deploying to Teams Workflows Webhook --- https://github.com/setup-your-mac/Setup-Your-Mac/tree/1.16.0
 #   Both have been combined and edited by Tony Young to allow for alerting to be sent to Microsoft Teams via the Teams Workflow Webhooks feature powered by Power Automate.
 #
 ###################################################################################################
@@ -38,14 +37,20 @@
 #
 ###################################################################################################
 
-# Script Parameters
-webhookURL="${10:-""}"
+# Teams Webhook URL
+# You'll need to set up a Teams webhook to receive the information being sent by the script. 
+# Once a Teams webhook is available, the teams_webhook variable should look similar
+# to this:
+# teams_webhook="https://companyname.webhook.office.com/webhookb2/7ce853bd-a9e1-462f-ae32-d3d35ed5295d@7c155bae-5207-4bb5-8b58-c43228bc1bb7/IncomingWebhook/8155d8581864479287b68b93f89556ae/651e63f8-2d96-42ab-bb51-65cb05fc62aa&quot;
+
+webhookURL=" "
 
 # Get system information
 currentUser=$(/usr/sbin/scutil <<< "show State:/Users/ConsoleUser" | /usr/bin/awk '/Name :/ { print $3 }')
 loggedInUserFullname=$( id -F "${currentUser}" )
 hostname=$(/bin/hostname)
 timestamp=$(/bin/date +"%Y-%m-%d %H:%M:%S")
+# Update futureTime based upon your ExpirationInterval key
 futureTime=$(/bin/date -v+10M -v+56S +"%Y-%m-%d %H:%M:%S")
 serialNumber=$(/usr/sbin/ioreg -l | /usr/bin/awk -F'"' '/IOPlatformSerialNumber/ {print $4}')
 logfile="/private/tmp/user-initiated-privileges-change.tmp"

@@ -106,20 +106,21 @@ import matplotlib.pyplot as plt
 # -----------------------------
 # Configurable Variables
 # -----------------------------
-INPUT_DIR = "STIG_Reports"          # Folder containing CSV reports.
-TIMEFRAME_DAYS = 30                 # Process only files created within the last 30 days.
-OUTPUT_FILE_PREFIX = "STIG_Compliance_Report"  # Prefix for output Excel file and pie chart image.
+INPUT_DIR = "/path/to/folder/direcor"          # Path to folder containing CSV reports.
+TIMEFRAME_DAYS = 30                 # Only process files created within the last 30 days.
+OUTPUT_FILE_PREFIX = "mSCP_Compliance_Report"  # Prefix for the output Excel file and pie chart image.
 OUTPUT_FILE = f"{OUTPUT_FILE_PREFIX}_{datetime.now().strftime('%Y%m%d')}.xlsx"
 
-# Compliance thresholds for both pie chart and Excel formatting.
+# Configurable compliance thresholds.
+# Format: category : (min_value, max_value). For "pass", both min and max are 0.
 COMPLIANCE_THRESHOLDS = {
-    "pass": (0, 0),            # 0 failures -> Pass
-    "low": (1, 25),            # 1-25 failures -> Low
-    "medium": (26, 50),        # 26-50 failures -> Medium
-    "high": (51, float("inf")) # >50 failures -> High
+    "pass": (0, 0),            # 0 failures => Pass
+    "low": (1, 25),            # 1-25 failures => Low
+    "medium": (26, 50),        # 26-50 failures => Medium
+    "high": (51, float("inf")) # >50 failures => High
 }
 
-# Colors for the pie chart.
+# Configurable pie chart colors for each category.
 PIE_CHART_COLORS = {
     "pass": "green",
     "low": "yellow",
@@ -127,16 +128,16 @@ PIE_CHART_COLORS = {
     "high": "red"
 }
 
-# Excel conditional formatting color schemes.
+# Configurable Excel conditional formatting.
 EXCEL_FORMATS = {
     "pass": {'bg_color': '#C6EFCE', 'font_color': '#006100'},    # Light green for Pass
-    "low": {'bg_color': '#FFEB9C', 'font_color': '#9C6500'},       # Light yellow for low failures
-    "medium": {'bg_color': '#FFB266', 'font_color': '#974C00'},      # Orange for medium failures
-    "high": {'bg_color': '#FFC7CE', 'font_color': '#9C0006'}         # Red for high failures
+    "low": {'bg_color': '#FFEB9C', 'font_color': '#9C6500'},       # Light yellow for Low
+    "medium": {'bg_color': '#FFB266', 'font_color': '#974C00'},      # Orange for Medium
+    "high": {'bg_color': '#FFC7CE', 'font_color': '#9C0006'}         # Red for High
 }
 
 # -----------------------------
-# Helper Functions
+# Updated Helper Functions
 # -----------------------------
 def get_file_creation_date(filepath):
     """
@@ -152,26 +153,24 @@ def get_file_creation_date(filepath):
     except AttributeError:
         return datetime.fromtimestamp(stat.st_ctime)
 
-def extract_date_from_filename(filename):
+def get_date_string_from_file(filepath):
     """
-    Extracts date from a filename in the expected format YYYY-MM-DDThh_mm_ss.
+    Converts the file's creation date to a standardized string (YYYY-MM-DD).
     
-    :param filename: The file's name or path.
-    :return: The date portion (YYYY-MM-DD) as a string, or None if not found.
+    :param filepath: Full path to the file.
+    :return: A date string in the format "YYYY-MM-DD".
     """
-    match = re.search(r'(\d{4}-\d{2}-\d{2})T\d{2}_\d{2}_\d{2}', os.path.basename(filename))
-    if match:
-        return match.group(1)
-    return None
+    creation_date = get_file_creation_date(filepath)
+    return creation_date.strftime("%Y-%m-%d")
 
 def generate_pie_chart(df_latest):
     """
     Generates a pie chart displaying compliance status based on configurable thresholds.
-    Categories are:
-      - Pass: 0 failures (green)
-      - Low: 1-25 failures (yellow)
-      - Medium: 26-50 failures (orange)
-      - High: >50 failures (red)
+    The categories are:
+      - Pass: 0 failures (Green)
+      - Low: 1-25 failures (Yellow)
+      - Medium: 26-50 failures (Orange)
+      - High: >50 failures (Red)
     
     :param df_latest: DataFrame of the most recent report.
     :return: The filename of the saved pie chart image.
@@ -206,8 +205,8 @@ def process_compliance_reports():
     
     - Scans for CSV files in INPUT_DIR.
     - Filters files to only include those with a creation date within TIMEFRAME_DAYS.
-    - Extracts dates from filenames (format: YYYY-MM-DDThh_mm_ss).
-    - Sorts files by the extracted date and selects the four most recent reports.
+    - Uses each file's creation date (via metadata) as the report date.
+    - Sorts files by creation date and selects the most recent reports.
     - Reads each CSV to build a compliance history per system (keyed by Serial Number).
     - Generates a trend analysis DataFrame (including an averages row).
     - Exports the data into an Excel workbook containing:
@@ -229,19 +228,19 @@ def process_compliance_reports():
     if not filtered_csv_files:
         raise FileNotFoundError(f"No CSV files in {INPUT_DIR} were created in the last {TIMEFRAME_DAYS} days.")
     
-    # Build a list of tuples: (filename, extracted_date) from filtered files.
+    # Build a list of tuples: (filename, date_string) using file creation metadata.
     dated_files = []
     for file in filtered_csv_files:
-        file_date = extract_date_from_filename(file)
-        if file_date:
-            dated_files.append((file, file_date))
+        file_date_str = get_date_string_from_file(file)
+        dated_files.append((file, file_date_str))
     
-    # Sort files by extracted date and select the four most recent.
+    # Sort files by date string (ascending) and select the most recent ones.
     dated_files.sort(key=lambda x: x[1])
+    # You can adjust how many reports to use; here we select the last 4.
     dated_files = dated_files[-4:]
     
     if not dated_files:
-        raise ValueError("No files with valid dates in the filename found after filtering.")
+        raise ValueError("No files with valid creation dates found after filtering.")
     
     # -----------------------------
     # Initialize Excel writer and workbook formatting.
@@ -319,6 +318,7 @@ def process_compliance_reports():
         trend_sheet.set_column('B:B', 30)  # Computer Name
         for col in range(2, len(trend_df.columns)):
             trend_sheet.set_column(col, col, 15)
+            # Apply conditional formatting for Low, Medium, and High.
             trend_sheet.conditional_format(1, col, len(trend_df)-1, col, {
                 'type': 'cell',
                 'criteria': 'between',

@@ -65,7 +65,7 @@ This roadmap is designed for IT professionals with 5+ years of experience who ar
 
 ## Phase 2: Position for Staff/Architect Roles (12–24 months)
 
-- Earn CISSP, CISM, or Jamf Security Admin (Jamf 380).
+- Earn CISSP, CISM, or Jamf Security Admin (Jamf 370).
 - Lead macOS security roadmap and Zero Trust integrations.
 - Present quarterly metrics to leadership and speak at community events.
 - Publish technical whitepapers or deep dives on platform engineering.
@@ -76,10 +76,3 @@ This roadmap is designed for IT professionals with 5+ years of experience who ar
 - Contribute to open-source or vendor tooling (AutoPkg, mSCP, Installomator).
 - Offer internal or external mentorship and career coaching.
 - Pilot enterprise-wide Apple-first strategies.
-
-## Beyond 5 Years: Executive or Independent Path
-
-- Move into Director, VP, or CTO roles—or launch consulting practice.
-- Influence product roadmaps with Apple, Jamf, Microsoft, etc.
-- Speak at DEF CON, Black Hat, Apple Security Summit.
-- Publish a macOS security strategy guide or online training platform.

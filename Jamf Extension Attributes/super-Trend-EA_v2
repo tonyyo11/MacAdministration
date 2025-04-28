@@ -1,0 +1,180 @@
+#!/bin/bash
+####################################################################################################
+# Script Name:  super-Trend-EA.sh (v3)
+# By:             Tony Young
+#                 https://github.com/tonyyo11/MacAdministration
+# Date:           April 28th, 2025
+# Version:        3.0
+#
+# Purpose:
+#   Emit a one-line category timeline from super.log for events within
+#   the most recent MAX_CYCLES, limiting to MAX_EVENTS_PER_CYCLE per cycle,
+#   optionally filtering by the last X days of logs and/or only since the last OS update,
+#   plus a summary of the date range at the top.
+####################################################################################################
+
+# USER CONFIGURATION
+ONLY_UNIQUE_TRANSITIONS=true    # show only when category changes?
+MAX_EVENTS_PER_CYCLE=10         # 0 = unlimited per cycle
+MAX_CYCLES=3                    # 0 = unlimited cycles (use most recent N)
+DAYS=30                         # 0 = include all days; otherwise only last X days
+TRACK_SINCE_UPDATE=false        # true = only track since last OS update
+
+# Paths
+SUPER_FOLDER="/Library/Management/super"
+SUPER_LOG_FOLDER="${SUPER_FOLDER}/logs"
+SUPER_LOG_FILE="${SUPER_LOG_FOLDER}/super.log"
+
+# Exit early if no log
+if [[ ! -f "$SUPER_LOG_FILE" ]]; then
+  echo "<result>No super.log file found</result>"
+  exit 0
+fi
+
+# Calculate cutoff epoch for date filtering
+if (( DAYS > 0 )); then
+  cutoff_epoch=$(date -v-"${DAYS}"d +%s 2>/dev/null) || \
+                cutoff_epoch=$(date --date="${DAYS} days ago" +%s 2>/dev/null)
+else
+  cutoff_epoch=0
+fi
+
+# Pre-scan for OS version changes to determine last_update_epoch
+last_version=""
+last_update_epoch=0
+while IFS= read -r raw; do
+  if [[ "$raw" == *"Status: Mac computer with"* ]]; then
+    ts=$(echo "$raw" | awk '{print $2" "$3" "$4}')
+    semver=$(echo "$raw" | sed -E 's/.*running: [^0-9]*([0-9]+\.[0-9]+(\.[0-9]+)?)-.*/\1/')
+    log_epoch=$(date -j -f "%b %d %T" "$ts" +%s 2>/dev/null) || \
+              log_epoch=$(date --date="$ts" +%s 2>/dev/null)
+    if [[ -z "$last_version" ]]; then
+      last_version="$semver"
+    elif [[ "$semver" != "$last_version" ]]; then
+      last_update_epoch=$log_epoch
+      last_version="$semver"
+    fi
+  fi
+done < <(grep -E "Status: Mac computer with" "$SUPER_LOG_FILE")
+
+# Determine threshold_epoch based on configuration
+if $TRACK_SINCE_UPDATE && (( last_update_epoch > 0 )); then
+  threshold_epoch=$last_update_epoch
+elif (( DAYS > 0 )); then
+  threshold_epoch=$cutoff_epoch
+else
+  threshold_epoch=0
+fi
+
+# Function to categorize lines
+categorize_line() {
+  local txt="$1"
+  if [[ "$txt" == *"super log was larger than"* ]]; then
+    echo "Resetting"; return
+  fi
+  if [[ "$txt" == *"SUPER STARTUP"* ]]; then
+    echo "Start"; return
+  fi
+  if [[ "$txt" == *"SCHEDULED RESTART"* ]]; then
+    echo "Pending"; return
+  fi
+  if [[ "$txt" == *"EXIT ERROR"* ]]; then
+    echo "Error"; return
+  fi
+  if [[ "$txt" == *"EXIT AND RESTART WORKFLOW"* ]]; then
+    echo "Pending"; return
+  fi
+  if [[ "$txt" == *"EXIT CLEAN"* ]]; then
+    echo "Complete"; return
+  fi
+  if [[ "$txt" == *"Deleting local preference"* ]] || [[ "$txt" == *"Deleting all local"* ]]; then
+    echo "Resetting"; return
+  fi
+  if [[ "$txt" == Status:* ]]; then
+    echo "Info"; return
+  fi
+  if [[ "$txt" == *"Inactive Error:"* ]]; then
+    echo "Error"
+  elif [[ "$txt" == *"Inactive:"* ]]; then
+    echo "Inactive"
+  elif [[ "$txt" == Running* ]]; then
+    [[ "$txt" == *"Dialog"* ]] && echo "Dialog Prompts" || echo "Running SoftwareUpdate"
+  elif [[ "$txt" == *"Pending:"* ]]; then
+    echo "Pending"
+  elif [[ "$txt" == *"Full super workflow complete!"* ]]; then
+    echo "Complete"
+  elif [[ "$txt" == *"Error:"* ]] || [[ "$txt" == *"Warning:"* ]]; then
+    echo "Error"
+  else
+    echo "Info"
+  fi
+}
+
+# 1) Count total cycles within threshold
+total_cycles=0
+while IFS= read -r raw; do
+  ts=$(echo "$raw" | awk '{print $2" "$3" "$4}')
+  log_epoch=$(date -j -f "%b %d %T" "$ts" +%s 2>/dev/null) || \
+            log_epoch=$(date --date="$ts" +%s 2>/dev/null)
+  [[ $log_epoch -lt $threshold_epoch ]] && continue
+  [[ "$raw" == *"SUPER STARTUP"* ]] && ((total_cycles++))
+done < <(grep -E "SUPER STARTUP" "$SUPER_LOG_FILE")
+
+# 2) Compute first cycle to capture
+if (( MAX_CYCLES > 0 )); then
+  first_cycle=$(( total_cycles - MAX_CYCLES + 1 ))
+  (( first_cycle < 1 )) && first_cycle=1
+else
+  first_cycle=1
+fi
+
+# 3) Build the condensed timeline
+cycle_idx=0
+cycle_event_count=0
+prev_cat=""
+timeline_str=""
+start_date=""
+end_date=""
+
+while IFS= read -r raw; do
+  ts=$(echo "$raw" | awk '{print $2" "$3" "$4}')
+  log_epoch=$(date -j -f "%b %d %T" "$ts" +%s 2>/dev/null) || \
+            log_epoch=$(date --date="$ts" +%s 2>/dev/null)
+  [[ $log_epoch -lt $threshold_epoch ]] && continue
+
+  msg="${raw#*]: }"
+  cat=$(categorize_line "$msg")
+
+  if [[ "$cat" == "Start" ]]; then
+    ((cycle_idx++))
+    cycle_event_count=0
+  fi
+  (( cycle_idx < first_cycle )) && continue
+
+  [[ -z "$start_date" ]] && start_date="$ts"
+  [[ "$cat" == "Info" ]] && continue
+  if $ONLY_UNIQUE_TRANSITIONS && [[ "$cat" == "$prev_cat" ]]; then
+    continue
+  fi
+  if [[ "$cat" != "Start" && MAX_EVENTS_PER_CYCLE -gt 0 ]]; then
+    ((cycle_event_count++))
+    (( cycle_event_count > MAX_EVENTS_PER_CYCLE )) && continue
+  fi
+
+  if [[ -z "$timeline_str" ]]; then
+    timeline_str="$cat"
+  else
+    timeline_str+=" - $cat"
+  fi
+  prev_cat="$cat"
+  end_date="$ts"
+done < <(grep -E "SUPER STARTUP|SCHEDULED RESTART|EXIT|CHECK FOR SOFTWARE|Status:" "$SUPER_LOG_FILE")
+
+# 4) Output summary + single-line timeline
+if [[ -n "$timeline_str" ]]; then
+  echo "<result>Timeline from ${start_date} to ${end_date}\n${timeline_str}</result>"
+else
+  echo "<result>No events found</result>"
+fi
+
+exit 0

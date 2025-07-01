@@ -114,6 +114,13 @@
       "default": true,
       "description": "If 'true', allows Notes Transcriptions. This key is not Apple Intelligence related. Available in macOS 15.4 and later.",
       "property_order": 75
+    },
+    "allowImagePlayground": {
+        "type": "boolean",
+        "title": "Allow Image Playground",
+        "default": true,
+        "description": "If 'false', prohibits the use of image generation. Requires a supervised device. Available in iOS 18 and later and macOS 15 and later.",
+        "property_order": 80
     }
   }
 }

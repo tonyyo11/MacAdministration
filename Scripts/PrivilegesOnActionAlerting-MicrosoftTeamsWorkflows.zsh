@@ -115,11 +115,13 @@ installLogEntries="N/A"
           /usr/bin/grep -E '(Install|Package|installd):' | \
           /usr/bin/tail -n 50)
 
-      # Fallback to install.log if it exists (for older macOS)
-      if [[ -z "$installLogEntries" && -f /var/log/install.log ]]; then
-          startDate=$(/bin/date -v-20M +"%Y-%m-%d %H:%M:%S")
-          installLogEntries=$(/usr/bin/awk -v d="$startDate" '$0 > d' /var/log/install.log 2>/dev/null | \
-              /usr/bin/grep -E 'Installer\[|installd\[' | /usr/bin/tail -n 50)
+      # Fallback to install.log if it exists 
+       if [[ -z "$installLogEntries" && -f /var/log/install.log ]]; then
+          # Use grep first to filter text lines, then process with awk to avoid binary data
+          installLogEntries=$(/usr/bin/grep -aE 'Installer\[|installd\[' /var/log/install.log 2>/dev/null | \
+              /usr/bin/tail -n 1000 | \
+              /usr/bin/awk -v d="$(/bin/date -v-20M +"%Y-%m-%d %H:%M:%S")" '$0 > d' 2>/dev/null | \
+              /usr/bin/tail -n 50)
       fi
   fi
 

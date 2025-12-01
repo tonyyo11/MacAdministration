@@ -1,10 +1,10 @@
 #!/bin/zsh
 
 ###################################################################################################
-# Script Name:   PrivilegesOnActionAlerting-MicrosoftTeamsWorkflows.zsh
+# Script Name:    PrivilegesOnActionAlerting-MicrosoftTeamsWorkflows.zsh
 # By:            Tony Young
-# Organization:  Cloud Lake Technology, an Akima company
-# Date:          December 1st, 2025
+# Organization:   Cloud Lake Technology, an Akima company
+# Date:          March 7th, 2025
 # 
 # Purpose:       Sends a web hook alert to Microsoft Teams upon privileged escalation on macOS
 #
@@ -21,7 +21,7 @@
 # CHANGELOG
 #
 #   2025-12-01 - Tony Young
-#       - v1.1 Fixed Demotion Scripting for Unified Logging. Minor enhancements elsewhere
+#       - v1.2 Fixed Demotion Scripting for Unified Logging. Minor enhancements elsewhere
 #   2025-02-12 - Tony Young
 #       - v1.0 Initial script creation
 #
@@ -110,31 +110,42 @@ fi
 installLogEntries="N/A"
   if [[ "$privilegeStatus" == "Standard User" ]]; then
       # Use unified logging system instead of deprecated install.log
-      installLogEntries=$(/usr/bin/log show --predicate 'process == "installd" OR process CONTAINS "install"' \
+      # Only capture actual "Installed" events, not verbose PackageKit details
+      installLogEntries=$(/usr/bin/log show --predicate 'process == "installd"' \
           --style syslog --last 20m --info 2>/dev/null | \
-          /usr/bin/grep -E '(Install|Package|installd):' | \
-          /usr/bin/tail -n 50)
+          /usr/bin/grep -E 'installd\[[0-9]+\]: Installed "' | \
+          /usr/bin/sed -E 's/.*Installed "([^"]+)".*/\1/' | \
+          /usr/bin/tail -n 5)
 
-      # Fallback to install.log if it exists 
-       if [[ -z "$installLogEntries" && -f /var/log/install.log ]]; then
+      # Fallback to install.log if it exists (for older macOS)
+      if [[ -z "$installLogEntries" && -f /var/log/install.log ]]; then
           # Use grep first to filter text lines, then process with awk to avoid binary data
-          installLogEntries=$(/usr/bin/grep -aE 'Installer\[|installd\[' /var/log/install.log 2>/dev/null | \
-              /usr/bin/tail -n 1000 | \
+          # Only capture actual installed packages
+          installLogEntries=$(/usr/bin/grep -aE 'installd\[[0-9]+\]: Installed "' /var/log/install.log 2>/dev/null | \
+              /usr/bin/tail -n 300 | \
               /usr/bin/awk -v d="$(/bin/date -v-20M +"%Y-%m-%d %H:%M:%S")" '$0 > d' 2>/dev/null | \
-              /usr/bin/tail -n 50)
+              /usr/bin/sed -E 's/.*Installed "([^"]+)".*/\1/' | \
+              /usr/bin/tail -n 5)
       fi
   fi
 
 # Sanitize LogMessage
 sanitizedReason="${promotionReason//[^[:print:]]/}"
-sanitizedInstallLog="${installLogEntries//[^[:print:]]/}"
+# Format install log as comma-separated list (cleaner for Teams)
+if [[ -n "$installLogEntries" && "$installLogEntries" != "N/A" ]]; then
+    sanitizedInstallLog=$(echo "$installLogEntries" | /usr/bin/tr '\n' ',' | /usr/bin/sed 's/,$//' | /usr/bin/sed 's/,/, /g')
+else
+    sanitizedInstallLog="N/A"
+fi
 
 # Construct log message
 logMessage="User $currentUser changed privilege status at $timestamp on $hostname. Expected removal at $futureTime. Status: $privilegeStatus. Reason: $sanitizedReason"
-[[ "$privilegeStatus" == "Standard User" ]] && logMessage+="\n\nInstall Log:\n\n$sanitizedInstallLog"
+if [[ "$privilegeStatus" == "Standard User" && "$sanitizedInstallLog" != "N/A" ]]; then
+    logMessage+=" | Recently Installed: $sanitizedInstallLog"
+fi
 
 /bin/echo "$logMessage" | /usr/bin/tee "$logfile"
-teamsMessage=$(printf '%s' "$logMessage" | /usr/bin/sed 's/\\/\\\\/g; s/"/\\"/g; s/$/\\n/' | /usr/bin/tr -d '\n')
+teamsMessage=$(printf '%s' "$logMessage" | /usr/bin/sed 's/\\/\\\\/g; s/"/\\"/g')
 
 # Prepare Teams Webhook
  webHookdata=$(cat <<EOF

@@ -1,10 +1,10 @@
 #!/bin/zsh
 
 ###################################################################################################
-# Script Name:    PrivilegesOnActionAlerting-MicrosoftTeamsWorkflows.zsh
+# Script Name:   PrivilegesOnActionAlerting-MicrosoftTeamsWorkflows.zsh
 # By:            Tony Young
-# Organization:   Cloud Lake Technology, an Akima company
-# Date:          March 7th, 2025
+# Organization:  Cloud Lake Technology, an Akima company
+# Date:          December 1st, 2025
 # 
 # Purpose:       Sends a web hook alert to Microsoft Teams upon privileged escalation on macOS
 #
@@ -20,6 +20,8 @@
 #
 # CHANGELOG
 #
+#   2025-12-01 - Tony Young
+#       - v1.1 Fixed Demotion Scripting for Unified Logging. Minor enhancements elsewhere
 #   2025-02-12 - Tony Young
 #       - v1.0 Initial script creation
 #
@@ -44,6 +46,10 @@
 # teams_webhook="https://companyname.webhook.office.com/webhookb2/7ce853bd-a9e1-462f-ae32-d3d35ed5295d@7c155bae-5207-4bb5-8b58-c43228bc1bb7/IncomingWebhook/8155d8581864479287b68b93f89556ae/651e63f8-2d96-42ab-bb51-65cb05fc62aa&quot;
 
 webhookURL=" "
+  if [[ -z "$webhookURL" || "$webhookURL" == " " ]]; then
+      /bin/echo "ERROR: webhookURL not configured. Exiting."
+      exit 1
+  fi
 
 # Get system information
 currentUser=$(/usr/sbin/scutil <<< "show State:/Users/ConsoleUser" | /usr/bin/awk '/Name :/ { print $3 }')
@@ -73,10 +79,12 @@ while ! $userWasAdmin && (( wait_time < 5 )); do
     /bin/sleep 1
     ((wait_time++))
     
-    # Recheck admin status
-    if echo "$adminUsers" | /usr/bin/grep -qw "$currentUser"; then
-        userWasAdmin=true
-    fi
+# Recheck admin status
+adminUsers=$(/usr/bin/dscl . -read /Groups/admin GroupMembership 2>/dev/null | /usr/bin/awk '{$1=""; print $0}' |
+  /usr/bin/tr -s ' ')
+      if echo "$adminUsers" | /usr/bin/grep -qw "$currentUser"; then
+          userWasAdmin=true
+      fi
 done
 
 # Determine new status
@@ -100,9 +108,20 @@ fi
 
 # Capture installation logs for demotion
 installLogEntries="N/A"
-if [[ "$privilegeStatus" == "Standard User" ]]; then
-    installLogEntries=$(/usr/bin/awk -v d="$($(/bin/date -v-20M +"%b %d %H:%M:%S"))" '$0 > d && ($0 ~ /Installer\[/ || $0 ~ /installd\[/) && ($0 ~ /Installation Log/ || $0 ~ /Install: \"/ || $0 ~ /PackageKit: Installed/)' /var/log/install.log 2>/dev/null)
-fi
+  if [[ "$privilegeStatus" == "Standard User" ]]; then
+      # Use unified logging system instead of deprecated install.log
+      installLogEntries=$(/usr/bin/log show --predicate 'process == "installd" OR process CONTAINS "install"' \
+          --style syslog --last 20m --info 2>/dev/null | \
+          /usr/bin/grep -E '(Install|Package|installd):' | \
+          /usr/bin/tail -n 50)
+
+      # Fallback to install.log if it exists (for older macOS)
+      if [[ -z "$installLogEntries" && -f /var/log/install.log ]]; then
+          startDate=$(/bin/date -v-20M +"%Y-%m-%d %H:%M:%S")
+          installLogEntries=$(/usr/bin/awk -v d="$startDate" '$0 > d' /var/log/install.log 2>/dev/null | \
+              /usr/bin/grep -E 'Installer\[|installd\[' | /usr/bin/tail -n 50)
+      fi
+  fi
 
 # Sanitize LogMessage
 sanitizedReason="${promotionReason//[^[:print:]]/}"
@@ -113,7 +132,7 @@ logMessage="User $currentUser changed privilege status at $timestamp on $hostnam
 [[ "$privilegeStatus" == "Standard User" ]] && logMessage+="\n\nInstall Log:\n\n$sanitizedInstallLog"
 
 /bin/echo "$logMessage" | /usr/bin/tee "$logfile"
-teamsMessage=$(/bin/echo "$logMessage" | /usr/bin/sed 's/"/\\"/g')
+teamsMessage=$(printf '%s' "$logMessage" | /usr/bin/sed 's/\\/\\\\/g; s/"/\\"/g; s/$/\\n/' | /usr/bin/tr -d '\n')
 
 # Prepare Teams Webhook
  webHookdata=$(cat <<EOF
@@ -200,20 +219,18 @@ EOF
 )
 
     # Send the message to Microsoft Teams
-    info "Send the message Microsoft Teams …"
-    info "${webHookdata}"
+    /bin/echo "Sending message to Microsoft Teams..."
 
-    curl --request POST \
-    --url "${webhookURL}" \
-    --header 'Content-Type: application/json' \
-    --data "${webHookdata}"
-    
-    webhookResult="$?"
-    info "Microsoft Teams Webhook Result: ${webhookResult}"
-    
-    fi
-    
-}
+  webhookResult=$(/usr/bin/curl --request POST \
+      --url "${webhookURL}" \
+      --header 'Content-Type: application/json' \
+      --data "${webHookdata}" \
+      --write-out "%{http_code}" \
+      --silent \
+      --output /dev/null)
+
+  /bin/echo "Microsoft Teams Webhook HTTP Response: ${webhookResult}"
+
+  exit 0
 
 
-exit 0

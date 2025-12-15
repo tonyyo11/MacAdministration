@@ -177,8 +177,8 @@ teamsMessage=$(printf '%s' "$logMessage" | /usr/bin/sed 's/\\/\\\\/g; s/"/\\"/g'
                                         "items": [
                                             {
                                                 "type": "Image",
-                                                "url": "https://ics.services.jamfcloud.com/icon/hash_d75d2250498be4cdfc75956d88dc7204dabf886a51396d0e99dbd75759e151ed",
-                                                "altText": "SYM",
+                                                "url": "https://use2.ics.services.jamfcloud.com/icon/hash_0a40b505b9649ef2bd895e426d581315f4b5414da56cc9ad0a98d682433ce89e",
+                                                "altText": "Privileges",
                                                 "size": "Small"
                                             }
                                         ],

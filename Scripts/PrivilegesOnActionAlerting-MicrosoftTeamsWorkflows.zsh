@@ -139,9 +139,14 @@ else
 fi
 
 # Construct log message
-logMessage="User $currentUser changed privilege status at $timestamp on $hostname. Expected removal at $futureTime. Status: $privilegeStatus. Reason: $sanitizedReason"
+if [[ "$privilegeStatus" == "Administrator" ]]; then
+  logMessage="User $currentUser changed privilege status at $timestamp on $hostname. Expected removal at $futureTime. Status: $privilegeStatus. Reason: $sanitizedReason"
+else
+  logMessage="User $currentUser changed privilege status at $timestamp on $hostname. Status: $privilegeStatus. Reason: $sanitizedReason"
+fi
+
 if [[ "$privilegeStatus" == "Standard User" && "$sanitizedInstallLog" != "N/A" ]]; then
-    logMessage+=" | Recently Installed: $sanitizedInstallLog"
+  logMessage+=" | Recently Installed: $sanitizedInstallLog"
 fi
 
 /bin/echo "$logMessage" | /usr/bin/tee "$logfile"

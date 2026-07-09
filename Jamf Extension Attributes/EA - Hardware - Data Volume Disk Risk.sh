@@ -5,7 +5,7 @@
 #                space floor across all drive sizes. Designed for Smart Group
 #                targeting and fleet health dashboard reporting.
 # Author:        Tony Young / Akima
-# Version:       2.0
+# Version:       2.0.1
 # Last Updated:  2026-03-21
 #
 # EA Type:       String
@@ -92,4 +92,4 @@ elif (( freeGB < FLOOR_MODERATE_GB )) || (( usedPct >= pctModerate )); then
     result="Moderate"
 fi
 
-echo "<r>${result}</r>"
+echo "<result>${result}</result>"
